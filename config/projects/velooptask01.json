@@ -1,0 +1,115 @@
+{
+  "project": {
+    "project_id": "veloop_task_01",
+    "name": "VELOOP Rewards Task 01",
+    "classification": "SIMULATED",
+    "production_data": false,
+    "evidence_note": "All supplied workbook records are fictional and are for analytical testing only."
+  },
+  "datasets": {
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000": {
+      "entity": "users",
+      "primary_key": "user_id",
+      "required_columns": ["user_id"],
+      "date_columns": ["registration_datetime"]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 02_Sessions": {
+      "entity": "sessions",
+      "primary_key": "session_id",
+      "required_columns": ["session_id", "user_id", "session_start"],
+      "date_columns": ["session_start", "session_end"],
+      "foreign_keys": [{"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"}]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 03_Feature_Events": {
+      "entity": "feature_events",
+      "primary_key": "event_id",
+      "required_columns": ["event_id", "user_id", "event_datetime"],
+      "date_columns": ["event_datetime"],
+      "status_baseline": "VELOOP_Simulated_User_Behavior_1000.xlsx / 03_Feature_Events",
+      "foreign_keys": [
+        {"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"},
+        {"column": "session_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 02_Sessions", "reference_column": "session_id"}
+      ]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 04_Daily_Activity": {
+      "entity": "daily_activity",
+      "primary_key": ["user_id", "activity_date"],
+      "required_columns": ["user_id", "activity_date"],
+      "date_columns": ["activity_date"],
+      "foreign_keys": [{"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"}]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 05_Task_Activity": {
+      "entity": "task_activity",
+      "primary_key": "activity_id",
+      "required_columns": ["activity_id", "user_id", "task_status"],
+      "date_columns": ["task_viewed_at", "task_started_at", "task_completed_at"],
+      "foreign_keys": [
+        {"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"},
+        {"column": "session_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 02_Sessions", "reference_column": "session_id"}
+      ]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 06_Milestones": {
+      "entity": "milestones",
+      "primary_key": ["user_id", "milestone_type", "milestone_datetime"],
+      "required_columns": ["user_id", "milestone_type", "milestone_datetime"],
+      "date_columns": ["milestone_datetime"],
+      "foreign_keys": [
+        {"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"},
+        {"column": "session_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 02_Sessions", "reference_column": "session_id"}
+      ]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 07_Feature_Usage": {
+      "entity": "feature_usage_summary",
+      "primary_key": "feature_name",
+      "required_columns": ["feature_name"]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 08_Data_Dictionary": {
+      "entity": "source_data_dictionary",
+      "primary_key": null,
+      "required_columns": ["field_name"]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 09_README_Status": {
+      "entity": "source_status_notes",
+      "primary_key": null,
+      "required_columns": ["Item"]
+    },
+    "VELOOP_Simulated_User_Behavior_1000.xlsx / 10_Event_Data_Quality_Audit": {
+      "entity": "event_quality_audit",
+      "primary_key": "event_id",
+      "required_columns": ["event_id", "user_id", "event_datetime"],
+      "date_columns": ["event_datetime"],
+      "foreign_keys": [
+        {"column": "user_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 01_Users_1000", "reference_column": "user_id"},
+        {"column": "session_id", "reference_dataset": "VELOOP_Simulated_User_Behavior_1000.xlsx / 02_Sessions", "reference_column": "session_id"}
+      ]
+    },
+    "VELoop_Rewards_Data_01.xlsx / Users_1000_Clean": {
+      "entity": "users_clean_reference",
+      "primary_key": "user_id",
+      "required_columns": ["user_id"],
+      "date_columns": ["registration_datetime", "last_login_datetime"]
+    },
+    "VELoop_Rewards_Data_01.xlsx / Users_Messy_Audit": {
+      "entity": "users_messy_audit",
+      "primary_key": "user_id",
+      "required_columns": ["user_id"],
+      "date_columns": ["registration_datetime", "last_login_datetime"],
+      "status_baseline": "VELoop_Rewards_Data_01.xlsx / Users_1000_Clean"
+    },
+    "VELoop_Rewards_Data_01.xlsx / Data_Dictionary": {
+      "entity": "source_data_dictionary",
+      "primary_key": null,
+      "required_columns": ["field_name"]
+    },
+    "VELoop_Rewards_Data_01.xlsx / Synthetic_Summary": {
+      "entity": "source_summary",
+      "primary_key": null,
+      "required_columns": ["Metric"]
+    },
+    "VELoop_Rewards_Data_01.xlsx / README_Data_Status": {
+      "entity": "source_status_notes",
+      "primary_key": null,
+      "required_columns": ["Item"]
+    }
+  }
+}

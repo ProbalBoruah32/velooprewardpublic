@@ -1,0 +1,13 @@
+id,priority,requirement,reason,dependency,owner,stage,status
+B001,CRITICAL,Confirm production-versus-simulated data boundaries and approve a source register,Integrity policy is mandatory and blocks all production claims,Product confirmation,Product and Analytics,Immediate,OPEN
+B002,CRITICAL,Define stable user event and transaction identifiers,Required for deduplication joins and lifecycle analysis,Engineering data contracts,Engineering,Pre-launch,OPEN
+B003,HIGH,Complete a 75-field traceable data dictionary,Required to align events model and metrics,Product and engineering review,Analytics and Engineering,Specification,OPEN
+B004,HIGH,Publish the event tracking plan with payload validation and idempotency criteria,At least 25 meaningful engineering-reviewable events are required,User task reward referral and transaction definitions,Analytics and Engineering,Specification,OPEN
+B005,HIGH,Complete messy-data audit and quality-control framework,The assignment explicitly requires issue-level findings and preventive controls,Supplied simulated workbooks,Analytics and Engineering,Current,IN PROGRESS
+B006,HIGH,Document wallet and withdrawal transaction models as proposed until data exists,These domains have no supplied transaction sheets,Product and engineering definitions,Product and Analytics,Specification,OPEN
+B007,HIGH,Validate shared user/session/event key relationships across simulated sheets,Required for relationship integrity and trustworthy profile conclusions,Profiled datasets,Analytics,Current,OPEN
+B008,MEDIUM,Create 30+ reproducible KPI specifications and mark unavailable inputs,Required by the brief; financial and referral metrics lack source records,Approved event and transaction definitions,Analytics and Product,Specification,OPEN
+B009,MEDIUM,Complete dashboard blueprint with unavailable-data indicators,Current dashboard is a prototype rather than the required visual specification,KPI catalogue,Analytics and Product,Design,OPEN
+B010,MEDIUM,Document pipeline monitoring ownership and failure handling,README currently contains only a high-level module map,Source and event contracts,Data and Engineering,Design,OPEN
+B011,MEDIUM,Approve privacy roles access and retention rules,No production governance policy supplied,Privacy and legal review,Privacy and Product,Design,OPEN
+B012,LOW,Produce the final consolidated report and executive summary,Must be consistent with all evidence-backed deliverables,D01-D20 reviewed,Analytics,Final,OPEN

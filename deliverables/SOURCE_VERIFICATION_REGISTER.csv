@@ -1,0 +1,11 @@
+id,information,source,source_type,date_checked,status,notes
+SRC-001,Assignment data is fictional/simulated,Data_Analyst_01 (4).pdf pages 1-2 and 36-38,Official assignment brief,2026-11-03,CONFIRMED,Mandatory: never present results as actual VELOOP performance
+SRC-002,The supplied user-behavior workbook has 10 sheets,VELOOP_Simulated_User_Behavior_1000.xlsx workbook metadata,Simulated,2026-11-03,CONFIRMED,Includes users sessions feature events daily activity task activity milestones feature usage dictionary status and event audit sheets
+SRC-003,The supplied rewards-data workbook has 5 sheets,VELoop_Rewards_Data_01.xlsx workbook metadata,Simulated,2026-11-03,CONFIRMED,Includes clean and messy user audit sheets data dictionary summary and status sheets
+SRC-004,The two supplied workbooks contain 15 sheets total,Workbook metadata inspected with OpenPyXL,Simulated,2026-11-03,CONFIRMED,Ingestion engine successfully enumerated all sheets
+SRC-005,No standalone rewards wallet withdrawals or referrals dataset sheet is present in the two supplied workbooks,Sheet names and headers of both supplied workbooks,Simulated,2026-11-03,CONFIRMED,Does not establish whether these features exist in the product
+SRC-006,Production event instrumentation and feature implementation status,Not established by supplied PDF or workbook evidence,Internal,2026-11-03,TO BE VERIFIED,Request confirmation from product and engineering before describing as implemented
+SRC-007,Production user counts and business performance,No production dataset supplied,Internal,2026-11-03,TO BE VERIFIED,Do not calculate or claim production metrics
+SRC-008,Supported reward units and wallet transaction lifecycle,No transaction records or approved internal definitions supplied,Internal,2026-11-03,TO BE VERIFIED,Any event/model definitions must be labelled PROPOSED
+SRC-009,Data retention period,No approved policy supplied,Internal,2026-11-03,TO BE VERIFIED,Do not invent a retention duration
+SRC-010,Product ownership for event and KPI approval,No named owners supplied,Internal,2026-11-03,TO BE VERIFIED,Use role-based proposed owners until confirmed

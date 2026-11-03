@@ -3,3 +3,17 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 .streamlit/secrets.toml
+
+# Uploaded datasets
+*.csv
+*.xls
+*.xlsx
+*.xlsm
+!deliverables/**/*.csv
+!deliverables/**/*.xls
+!deliverables/**/*.xlsx
+!deliverables/**/*.xlsm
+Data_Analyst_01*.pdf
+
+# Generated reports
+/outputs/

@@ -33,3 +33,35 @@ def test_loads_csv_and_all_excel_sheets_and_builds_audit_workbook():
     assert workbook.sheetnames[:2] == ["users.csv", "activity.xlsx _ Events"]
     assert "Inventory" in workbook.sheetnames
     assert "Column Profile" in workbook.sheetnames
+    assert "Quality Findings" in workbook.sheetnames
+
+
+def test_audit_workbook_neutralizes_formula_like_source_text():
+    dataset = load_uploaded_file("formulas.csv", b"value\n=1+1\n")[0]
+    workbook = load_workbook(BytesIO(build_audit_workbook([dataset])), read_only=True)
+
+    assert workbook["formulas.csv"]["A2"].value == "'=1+1"
+
+
+def test_audit_workbook_excludes_direct_identifiers_and_records_privacy_notes():
+    dataset = load_uploaded_file(
+        "people.csv",
+        b"full_name,email,feature_name\nAda Lovelace,ada@example.com,tasks\n",
+    )[0]
+    profile = profile_dataset(dataset.dataframe)
+    workbook = load_workbook(BytesIO(build_audit_workbook([dataset])), read_only=True)
+    exported_columns = [cell.value for cell in workbook["people.csv"][1]]
+    privacy_notes = list(workbook["Privacy Notes"].iter_rows(values_only=True))
+    exported_values = [
+        cell.value
+        for sheet in workbook.worksheets
+        for row in sheet.iter_rows()
+        for cell in row
+    ]
+
+    assert exported_columns == ["feature_name"]
+    assert profile.loc[profile["column"] == "email", "top_values"].item() == ""
+    assert profile.loc[profile["column"] == "email", "sensitive"].item()
+    assert {row[1] for row in privacy_notes[1:]} == {"full_name", "email"}
+    assert "ada@example.com" not in exported_values
+    assert "Ada Lovelace" not in exported_values
