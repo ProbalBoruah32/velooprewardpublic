@@ -23,6 +23,14 @@ A reusable Streamlit MVP for uploading datasets, profiling their structure, revi
 
 Business KPI calculations, project-specific rule selection inside the app, PDF reports, and Word reports are not implemented yet; the corresponding pages show their current availability rather than invented results.
 
+## Deploy the static edition to Netlify
+
+Netlify cannot run the Python/Streamlit entry point. This repository includes a separate static edition in `netlify/` that reproduces browser-side ingestion, profiling, quality observations, relationship suggestions, and Excel audit export. Uploaded file contents are processed in the visitor's browser and are not sent to Netlify. Uploads are limited to 50 MB per file and 100 MB per browser session. Do not upload sensitive production data to a public site without your organization's approval.
+
+To deploy from the Netlify dashboard, import this GitHub repository, select the `develop` branch, leave the build command empty, and set the publish directory to `netlify`. The included `netlify.toml` also configures the publish directory. For a CLI deployment, run `npx netlify-cli deploy --prod --dir netlify` after authenticating the Netlify CLI.
+
+The static edition depends on SheetJS and Plotly CDN scripts for spreadsheet parsing/export and charts. Its KPI catalogue reports availability rather than calculating unapproved business metrics. PDF/Word report generation and Python quality rules remain available only in the local Streamlit edition.
+
 ## Run locally on Windows
 
 ```powershell

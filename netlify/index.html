@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#162326">
+    <meta name="description" content="A private, browser-based workspace for profiling uploaded CSV and Excel datasets.">
+    <title>VELOOP Data Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script defer src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#overview" aria-label="VELOOP Data Intelligence home">
+          <span class="brand-mark">V</span>
+          <span class="brand-name">VELOOP<span>DATA INTELLIGENCE</span></span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-page="Overview"><span class="nav-icon">◫</span>Overview</button>
+          <button class="nav-item" data-page="Analytics"><span class="nav-icon">⌁</span>Analytics</button>
+          <button class="nav-item" data-page="Datasets"><span class="nav-icon">▤</span>Datasets</button>
+          <button class="nav-item" data-page="Data Quality"><span class="nav-icon">◇</span>Data Quality</button>
+          <button class="nav-item" data-page="Relationships"><span class="nav-icon">⌘</span>Relationships</button>
+          <button class="nav-item" data-page="KPI Catalogue"><span class="nav-icon">◷</span>KPI Catalogue</button>
+          <button class="nav-item" data-page="Reports"><span class="nav-icon">⇩</span>Reports</button>
+          <button class="nav-item" data-page="Settings"><span class="nav-icon">⚙</span>Settings</button>
+        </nav>
+
+        <section class="sidebar-upload" aria-labelledby="upload-title">
+          <div class="sidebar-section-label" id="upload-title">WORKSPACE DATA</div>
+          <label class="upload-trigger" for="file-input"><span aria-hidden="true">＋</span> Add datasets</label>
+          <input id="file-input" class="visually-hidden" type="file" accept=".csv,.xlsx,.xls,.xlsm" multiple>
+          <p class="sidebar-note">CSV, XLS, XLSX, XLSM<br>50 MB per file · 100 MB total</p>
+        </section>
+
+        <div class="sidebar-footer">
+          <div class="privacy-indicator"><span></span> Files stay in this browser</div>
+          <div class="version-label">NETLIFY EDITION · 0.4.0</div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" aria-label="Toggle navigation">☰</button>
+          <div class="workspace-name"><span class="workspace-glyph">V</span><span>VELOOP Rewards</span><span class="workspace-badge">SIMULATED WORKSPACE</span></div>
+          <div class="topbar-tools">
+            <label class="search-box"><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Search datasets" autocomplete="off"></label>
+            <span class="privacy-pill"><span></span>Local processing</span>
+          </div>
+        </header>
+
+        <div class="content-wrap">
+          <section class="page-heading">
+            <div>
+              <p class="eyebrow" id="page-eyebrow">DATA WORKSPACE</p>
+              <h1 id="page-title">Overview</h1>
+              <p class="page-description" id="page-description">Key dataset indicators and current data-quality signals.</p>
+            </div>
+            <div class="heading-actions">
+              <span class="classification"><span class="classification-dot"></span>SIMULATED DATA</span>
+            </div>
+          </section>
+
+          <section class="empty-state" id="empty-state">
+            <div class="empty-visual"><span class="empty-file">↥</span><span class="empty-orbit orbit-a"></span><span class="empty-orbit orbit-b"></span></div>
+            <p class="eyebrow">START WITH YOUR DATA</p>
+            <h2>Bring your datasets into view.</h2>
+            <p class="empty-copy">Select CSV or Excel files to inspect their structure, completeness, and quality signals. Excel workbooks are split into one dataset per sheet.</p>
+            <label class="button button-primary" for="file-input">Choose files <span aria-hidden="true">↗</span></label>
+            <p class="privacy-promise"><span>●</span> Files are processed locally and never uploaded to a server.</p>
+          </section>
+
+          <section id="data-view" class="data-view hidden">
+            <div class="metric-grid" id="metric-grid"></div>
+
+            <section class="visual-grid" id="overview-visuals">
+              <article class="panel chart-panel chart-wide">
+                <div class="panel-heading"><div><p class="panel-kicker">WORKSPACE</p><h2>Records by dataset</h2></div><span class="panel-menu">ROWS</span></div>
+                <div id="records-chart" class="chart-area" aria-label="Records by dataset chart"></div>
+              </article>
+              <article class="panel chart-panel">
+                <div class="panel-heading"><div><p class="panel-kicker">COMPLETENESS</p><h2>Missing values</h2></div><select id="missing-dataset-select" class="compact-select" aria-label="Dataset for missing values chart"></select></div>
+                <div id="missing-chart" class="chart-area" aria-label="Missing values chart"></div>
+              </article>
+            </section>
+
+            <section class="panel table-panel" id="inventory-panel">
+              <div class="panel-heading"><div><p class="panel-kicker">SOURCE INVENTORY</p><h2>Datasets</h2></div><span class="result-count" id="dataset-count"></span></div>
+              <div class="table-scroll"><table><thead><tr><th>Dataset</th><th>Source</th><th>Sheet</th><th>Rows</th><th>Columns</th><th>Duplicate rows</th></tr></thead><tbody id="inventory-body"></tbody></table></div>
+            </section>
+
+            <section class="page-panel hidden" id="analytics-panel">
+              <div class="panel chart-panel analytics-chart-panel"><div class="panel-heading"><div><p class="panel-kicker">DISTRIBUTION</p><h2 id="analytics-title">Field distribution</h2></div><div class="field-controls"><select id="analytics-dataset-select" class="compact-select" aria-label="Dataset to analyse"></select><select id="analytics-field-select" class="compact-select" aria-label="Field to analyse"></select></div></div><div id="analytics-chart" class="chart-area analytics-chart-area"></div></div>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">COLUMN SUMMARY</p><h2>Profile</h2></div></div><div class="table-scroll"><table><thead><tr><th>Field</th><th>Type</th><th>Missing</th><th>Unique</th><th>Min</th><th>Mean</th><th>Median</th><th>Max</th></tr></thead><tbody id="profile-body"></tbody></table></div></article>
+            </section>
+
+            <section class="page-panel hidden" id="quality-panel">
+              <div class="quality-summary" id="quality-summary"></div>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">AUDIT RESULTS</p><h2>Quality observations</h2></div><select id="quality-dataset-select" class="compact-select" aria-label="Dataset for quality findings"></select></div><p class="table-note">Missing values are observations unless an approved project rule marks them as required. No source records are changed.</p><div class="table-scroll"><table><thead><tr><th>Check</th><th>Status</th><th>Severity</th><th>Field</th><th>Rows affected</th><th>Evidence</th></tr></thead><tbody id="quality-body"></tbody></table></div></article>
+            </section>
+
+            <section class="page-panel hidden" id="relationships-panel">
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">SUGGESTED LINKS</p><h2>Potential relationships</h2></div><span class="suggestion-tag">REVIEW BEFORE USE</span></div><p class="table-note">Suggestions use matching identifier-like column names only. Keys are not joined automatically; confirm entity meaning and cardinality first.</p><div class="table-scroll"><table><thead><tr><th>Dataset</th><th>Field</th><th>Possible match</th><th>Reference field</th><th>Source rows</th><th>Match rate</th></tr></thead><tbody id="relationships-body"></tbody></table></div></article>
+            </section>
+
+            <section class="page-panel hidden" id="kpi-panel">
+              <div class="availability-banner"><span class="availability-icon">i</span><div><strong>No approved KPI definitions are configured.</strong><p>Metric values are not inferred from column names. Add approved definitions and confirm qualifying events before calculating business KPIs.</p></div></div>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">DATA AVAILABILITY</p><h2>Business domains</h2></div></div><div id="domain-list" class="domain-list"></div></article>
+            </section>
+
+            <section class="page-panel hidden" id="reports-panel">
+              <article class="panel report-card"><div class="report-icon">XLS</div><div class="report-copy"><p class="panel-kicker">AUDIT EXPORT</p><h2>Excel audit workbook</h2><p>Includes dataset inventory, column profiles, quality findings, and source sheets with common direct-identifier columns excluded.</p></div><button id="download-report" class="button button-primary">Generate &amp; download <span aria-hidden="true">↓</span></button></article>
+              <div class="availability-banner subdued"><span class="availability-icon">i</span><div><strong>PDF and Word reports are not available in this static edition.</strong><p>This Netlify site runs without a Python server. The full report generators remain available in the local Streamlit version.</p></div></div>
+            </section>
+
+            <section class="page-panel hidden" id="settings-panel">
+              <article class="panel settings-panel"><div class="panel-heading"><div><p class="panel-kicker">PROJECT CONFIGURATION</p><h2>Workspace settings</h2></div></div><dl class="settings-list"><div><dt>Project</dt><dd>VELOOP Rewards Task 01</dd></div><div><dt>Data classification</dt><dd><span class="classification"><span class="classification-dot"></span>Simulated / user supplied</span></dd></div><div><dt>Processing</dt><dd>In this browser session</dd></div><div><dt>Server-side file storage</dt><dd>None</dd></div><div><dt>Business rules</dt><dd>Not configured</dd></div></dl><p class="table-note">Do not upload production personal data to this public static site unless your organization has approved the use and browser environment.</p></article>
+            </section>
+          </section>
+
+          <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+          <footer class="page-footer"><span>VELOOP DATA INTELLIGENCE</span><span>SIMULATED DATA · NO PRODUCTION METRICS</span></footer>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
