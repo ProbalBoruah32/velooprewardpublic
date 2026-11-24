@@ -9,7 +9,7 @@ colorTo: cyan
 
 # VELOOP Data Intelligence Platform
 
-A reusable Streamlit MVP for uploading datasets, profiling their structure, reviewing quality signals, and exporting an Excel audit workbook. Company-specific schemas, KPIs, and business rules are intentionally kept out of the core engine so project configurations can be added later.
+A reusable Streamlit MVP and browser-only Netlify edition for uploading datasets, profiling their structure, reviewing quality signals, and exploring evidence-based simulated product analytics. Supplied workbook values remain classified as simulated; unsupported financial, withdrawal, referral, and revenue metrics are explicitly marked as requiring data.
 
 ## Current scope
 
@@ -19,9 +19,18 @@ A reusable Streamlit MVP for uploading datasets, profiling their structure, revi
 - Explore dataset distributions and suggested relationships based on matching field names.
 - Review configured and unconfigured quality findings without treating every missing value as an error.
 - Download an audit workbook containing source data, inventory, column profiles, and quality findings.
-- Use Overview, Analytics, Datasets, Data Quality, Relationships, KPI Catalogue, Reports, and Settings pages.
+- Calculate a 35-metric KPI catalogue from actual user, session, event, daily activity, task, and milestone fields.
+- Explore user, session, feature, task-funnel, cohort-retention, and milestone analytics with date filters.
+- Search observed data dictionary fields; distinguish source-documented definitions from observed fields with proposed definitions.
+- Validate candidate user/session relationships against source keys, including match rates, orphan rows, and duplicate reference keys.
+- Export the expanded audit/KPI/dictionary/relationship workbook. The static edition can print the executive overview to PDF using the browser's Save as PDF function.
+- Use Overview, Executive Overview, Product Analytics, Analytics, Datasets, Data Quality, Relationships, KPI Catalogue, Data Dictionary, Reports, and Settings.
 
-Business KPI calculations, project-specific rule selection inside the app, PDF reports, and Word reports are not implemented yet; the corresponding pages show their current availability rather than invented results.
+The new product-analytics modules are in the browser-based Netlify edition; the existing local Streamlit MVP remains available for its original upload, profiling, quality, and audit workflow and has not been ported to the new product dashboard.
+
+KPI values use the actual uploaded data and retain source, formula, availability, and limitations. Retention uses registration cohorts and exact day-N activity windows; cohorts without a fully observed window are excluded. Session/task durations exclude invalid or negative intervals. The browser edition has no server-side storage, does not alter source rows, and excludes common direct identifiers from report exports. Word exports and a native PDF generator are not included.
+
+The supplied workbook's `events_in_session` summary disagrees with joined Feature Events for 7,537 of 7,913 sessions. The app flags this quality issue and calculates average events per session from Feature Events joined to all observed session IDs, rather than trusting the inconsistent summary field.
 
 ## Deploy the static edition to Netlify
 
@@ -29,7 +38,7 @@ Netlify cannot run the Python/Streamlit entry point. This repository includes a 
 
 To deploy from the Netlify dashboard, import this GitHub repository, select the `develop` branch, leave the build command empty, and set the publish directory to `netlify`. The included `netlify.toml` also configures the publish directory. For a CLI deployment, run `npx netlify-cli deploy --prod --dir netlify` after authenticating the Netlify CLI.
 
-The static edition depends on SheetJS and Plotly CDN scripts for spreadsheet parsing/export and charts. Its KPI catalogue reports availability rather than calculating unapproved business metrics. PDF/Word report generation and Python quality rules remain available only in the local Streamlit edition.
+The static edition depends on SheetJS and Plotly CDN scripts for spreadsheet parsing/export and charts. It processes uploads in the browser, fingerprints workbook contents to skip exact duplicate imports, and calculates metrics only when required fields are present. The Excel audit includes actual KPI results, field definitions, data quality findings, relationships, and future data requirements. PDF output is provided through browser printing; Word report generation is not included.
 
 ## Run locally on Windows
 
@@ -46,6 +55,12 @@ Open `http://localhost:8501` if the browser does not open automatically.
 
 ```powershell
 python -m pytest
+```
+
+Run the browser analytics logic tests with Node.js:
+
+```powershell
+node --test tests\test_product_analytics.js
 ```
 
 ## VELOOP Task 01 deliverables
@@ -75,6 +90,11 @@ veloop_data_intelligence/
   profiling.py
   quality.py
   exporting.py
+netlify/
+  product_analytics.js
+  app.js
+  index.html
+  styles.css
 tests/
 config/projects/
 deliverables/

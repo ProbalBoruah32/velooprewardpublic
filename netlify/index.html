@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="/styles.css">
     <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script defer src="/product_analytics.js"></script>
     <script defer src="/app.js"></script>
   </head>
   <body>
@@ -24,11 +25,14 @@
 
         <nav class="primary-nav" aria-label="Main navigation">
           <button class="nav-item active" data-page="Overview"><span class="nav-icon">◫</span>Overview</button>
+          <button class="nav-item" data-page="Executive Overview"><span class="nav-icon">▥</span>Executive Overview</button>
+          <button class="nav-item" data-page="Product Analytics"><span class="nav-icon">⌁</span>Product Analytics</button>
           <button class="nav-item" data-page="Analytics"><span class="nav-icon">⌁</span>Analytics</button>
           <button class="nav-item" data-page="Datasets"><span class="nav-icon">▤</span>Datasets</button>
           <button class="nav-item" data-page="Data Quality"><span class="nav-icon">◇</span>Data Quality</button>
           <button class="nav-item" data-page="Relationships"><span class="nav-icon">⌘</span>Relationships</button>
           <button class="nav-item" data-page="KPI Catalogue"><span class="nav-icon">◷</span>KPI Catalogue</button>
+          <button class="nav-item" data-page="Data Dictionary"><span class="nav-icon">▧</span>Data Dictionary</button>
           <button class="nav-item" data-page="Reports"><span class="nav-icon">⇩</span>Reports</button>
           <button class="nav-item" data-page="Settings"><span class="nav-icon">⚙</span>Settings</button>
         </nav>
@@ -42,7 +46,7 @@
 
         <div class="sidebar-footer">
           <div class="privacy-indicator"><span></span> Files stay in this browser</div>
-          <div class="version-label">NETLIFY EDITION · 0.4.0</div>
+          <div class="version-label">NETLIFY EDITION · 0.5.0</div>
         </div>
       </aside>
 
@@ -103,25 +107,116 @@
 
             <section class="page-panel hidden" id="quality-panel">
               <div class="quality-summary" id="quality-summary"></div>
-              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">AUDIT RESULTS</p><h2>Quality observations</h2></div><select id="quality-dataset-select" class="compact-select" aria-label="Dataset for quality findings"></select></div><p class="table-note">Missing values are observations unless an approved project rule marks them as required. No source records are changed.</p><div class="table-scroll"><table><thead><tr><th>Check</th><th>Status</th><th>Severity</th><th>Field</th><th>Rows affected</th><th>Evidence</th></tr></thead><tbody id="quality-body"></tbody></table></div></article>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">AUDIT RESULTS</p><h2>Quality observations</h2></div><select id="quality-dataset-select" class="compact-select" aria-label="Dataset for quality findings"></select></div><p class="table-note">Findings are read-only and aggregated by rule. No source records are changed.</p><div class="table-scroll"><table><thead><tr><th>Issue ID</th><th>Dataset</th><th>Field</th><th>Issue type</th><th>Rows affected</th><th>Severity</th><th>Status</th><th>Detection logic</th><th>Suggested correction / prevention</th></tr></thead><tbody id="quality-body"></tbody></table></div></article>
             </section>
 
             <section class="page-panel hidden" id="relationships-panel">
-              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">SUGGESTED LINKS</p><h2>Potential relationships</h2></div><span class="suggestion-tag">REVIEW BEFORE USE</span></div><p class="table-note">Suggestions use matching identifier-like column names only. Keys are not joined automatically; confirm entity meaning and cardinality first.</p><div class="table-scroll"><table><thead><tr><th>Dataset</th><th>Field</th><th>Possible match</th><th>Reference field</th><th>Source rows</th><th>Match rate</th></tr></thead><tbody id="relationships-body"></tbody></table></div></article>
+              <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">RELATIONSHIP EXPLORER</p><h2>Candidate entity links (matched row volume)</h2></div></div><div id="relationship-diagram-chart" class="chart-area analytics-chart-area"></div></article>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">EVIDENCE-TESTED CANDIDATES</p><h2>Potential relationships</h2></div><span class="suggestion-tag">CANDIDATE · REVIEW BEFORE USE</span></div><p class="table-note">Known user/session identifier roles are evaluated against observed source keys. Matching names alone do not prove a relationship; no joins are performed.</p><div class="table-scroll"><table><thead><tr><th>Dataset</th><th>Foreign key candidate</th><th>Reference dataset</th><th>Cardinality candidate</th><th>Source rows</th><th>Matched rows</th><th>Orphans</th><th>Match rate</th><th>Duplicate reference keys</th><th>Evidence / status</th></tr></thead><tbody id="relationships-body"></tbody></table></div></article>
             </section>
 
             <section class="page-panel hidden" id="kpi-panel">
-              <div class="availability-banner"><span class="availability-icon">i</span><div><strong>No approved KPI definitions are configured.</strong><p>Metric values are not inferred from column names. Add approved definitions and confirm qualifying events before calculating business KPIs.</p></div></div>
-              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">DATA AVAILABILITY</p><h2>Business domains</h2></div></div><div id="domain-list" class="domain-list"></div></article>
+              <div class="availability-banner"><span class="availability-icon">i</span><div><strong>Simulated source data only — not VELOOP production performance.</strong><p>Values use validated fields from the uploaded source sheets. Event counts, users, and task activity are kept distinct; unavailable financial metrics remain proposed.</p></div></div>
+              <article class="panel dictionary-controls"><label>Search KPI <input type="search" id="kpi-search" placeholder="Name, source, formula..."></label><label>Availability <select id="kpi-status-filter"><option value="">All statuses</option><option>Calculable</option><option>Partially Calculable</option><option>Not Calculable</option><option>Proposed – Data Required</option></select></label></article>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">35 DEFINED METRICS</p><h2>KPI catalogue</h2></div><span class="result-count" id="kpi-count"></span></div><div class="table-scroll"><table><thead><tr><th>KPI</th><th>Value</th><th>Availability</th><th>Definition</th><th>Formula</th><th>Required fields</th><th>Source dataset</th><th>Frequency</th><th>Business purpose / interpretation</th><th>Limitations</th></tr></thead><tbody id="kpi-body"></tbody></table></div></article>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">PROPOSED · DATA REQUIRED</p><h2>Future data requirements</h2></div></div><div class="table-scroll"><table><thead><tr><th>Area</th><th>Why required</th><th>Suggested fields</th><th>Priority</th><th>Owner</th><th>Verification</th></tr></thead><tbody id="requirements-body"></tbody></table></div></article>
             </section>
 
             <section class="page-panel hidden" id="reports-panel">
-              <article class="panel report-card"><div class="report-icon">XLS</div><div class="report-copy"><p class="panel-kicker">AUDIT EXPORT</p><h2>Excel audit workbook</h2><p>Includes dataset inventory, column profiles, quality findings, and source sheets with common direct-identifier columns excluded.</p></div><button id="download-report" class="button button-primary">Generate &amp; download <span aria-hidden="true">↓</span></button></article>
-              <div class="availability-banner subdued"><span class="availability-icon">i</span><div><strong>PDF and Word reports are not available in this static edition.</strong><p>This Netlify site runs without a Python server. The full report generators remain available in the local Streamlit version.</p></div></div>
+              <article class="panel report-card"><div class="report-icon">XLS</div><div class="report-copy"><p class="panel-kicker">AUDIT + ANALYTICS EXPORT</p><h2>Excel audit workbook</h2><p>Includes dataset inventory and profiles, KPI catalogue, observed data dictionary, quality findings, relationship checks, and privacy-conscious source sheets.</p></div><button id="download-report" class="button button-primary">Generate &amp; download <span aria-hidden="true">↓</span></button></article>
+              <article class="panel report-card"><div class="report-icon">PDF</div><div class="report-copy"><p class="panel-kicker">EXECUTIVE REPORT</p><h2>Print / save executive overview as PDF</h2><p>Use your browser’s print dialog and choose “Save as PDF”. The report shows the current filtered, evidence-backed executive summary.</p></div><button id="print-executive-report" class="button button-primary">Print executive report <span aria-hidden="true">↗</span></button></article>
+              <div class="availability-banner subdued"><span class="availability-icon">i</span><div><strong>Browser-print executive PDF; Word exports are not included.</strong><p>Use Print / Save as PDF for the filtered executive page. This static edition creates the Excel reports locally in the browser.</p></div></div>
             </section>
 
             <section class="page-panel hidden" id="settings-panel">
               <article class="panel settings-panel"><div class="panel-heading"><div><p class="panel-kicker">PROJECT CONFIGURATION</p><h2>Workspace settings</h2></div></div><dl class="settings-list"><div><dt>Project</dt><dd>VELOOP Rewards Task 01</dd></div><div><dt>Data classification</dt><dd><span class="classification"><span class="classification-dot"></span>Simulated / user supplied</span></dd></div><div><dt>Processing</dt><dd>In this browser session</dd></div><div><dt>Server-side file storage</dt><dd>None</dd></div><div><dt>Business rules</dt><dd>Not configured</dd></div></dl><p class="table-note">Do not upload production personal data to this public static site unless your organization has approved the use and browser environment.</p></article>
+            </section>
+
+            <section class="page-panel hidden" id="executive-panel">
+              <div class="product-filter panel">
+                <label>From <input type="date" id="product-date-start"></label>
+                <label>To <input type="date" id="product-date-end"></label>
+                <span id="product-observation-note" class="table-note">Metrics are calculated from uploaded source datasets.</span>
+              </div>
+              <div class="metric-grid" id="executive-metrics"></div>
+              <div class="visual-grid">
+                <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ENGAGEMENT</p><h2>Daily active users</h2></div></div><div id="executive-dau-chart" class="chart-area"></div></article>
+                <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ACQUISITION</p><h2>Registrations over time</h2></div></div><div id="executive-registration-chart" class="chart-area"></div></article>
+              </div>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">SOURCE COVERAGE & READINESS</p><h2>Dataset coverage and warnings</h2></div></div><p class="table-note">Readiness is categorical and based on source/field availability and executed checks. No unsubstantiated readiness percentage is calculated. Proposed events are explicitly not observed telemetry.</p><div class="table-scroll"><table><thead><tr><th>Product area</th><th>Source dataset</th><th>Records</th><th>Available fields</th><th>Missing required fields</th><th>Proposed events (not observed)</th><th>KPI dependencies</th><th>Coverage / readiness</th><th>Priority / data note</th></tr></thead><tbody id="coverage-body"></tbody></table></div></article>
+            </section>
+
+            <section class="page-panel hidden" id="product-panel">
+              <div class="product-filter panel">
+                <label>From <input type="date" id="product-date-start-secondary"></label>
+                <label>To <input type="date" id="product-date-end-secondary"></label>
+                <span class="table-note">Filters apply to event/activity records. Data remains in this browser.</span>
+              </div>
+              <nav class="product-tabs" aria-label="Product analytics modules">
+                <button class="product-tab active" data-product-tab="users">Users</button>
+                <button class="product-tab" data-product-tab="sessions">Sessions</button>
+                <button class="product-tab" data-product-tab="features">Features</button>
+                <button class="product-tab" data-product-tab="tasks">Tasks</button>
+                <button class="product-tab" data-product-tab="retention">Retention</button>
+                <button class="product-tab" data-product-tab="milestones">Milestones</button>
+              </nav>
+              <div class="product-module" data-product-module="users">
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">USER STATUS</p><h2>Account status</h2></div></div><div id="user-status-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ACTIVITY</p><h2>Active vs no observed activity</h2></div></div><div id="user-activity-chart" class="chart-area"></div></article>
+                </div>
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ONBOARDING</p><h2>Verification status</h2></div></div><div id="user-verification-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ONBOARDING</p><h2>Onboarding status</h2></div></div><div id="user-onboarding-chart" class="chart-area"></div></article>
+                </div>
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">ACQUISITION</p><h2>Acquisition source</h2></div></div><div id="user-acquisition-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">PLATFORM</p><h2>Registered user platform</h2></div></div><div id="user-platform-chart" class="chart-area"></div></article>
+                </div>
+                <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">GEOGRAPHY</p><h2>Users by state (where supplied)</h2></div></div><div id="user-geography-chart" class="chart-area"></div></article>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">ANONYMIZED DRILL-DOWN</p><h2>User activity details</h2></div></div><p class="table-note">Pseudonymous user IDs only. Email, name, and direct identifiers are not shown.</p><div class="table-scroll"><table><thead><tr><th>User ID</th><th>Registration</th><th>Account status</th><th>Verification</th><th>Onboarding</th><th>Active days</th></tr></thead><tbody id="user-detail-body"></tbody></table></div></article>
+              </div>
+              <div class="product-module hidden" data-product-module="sessions">
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION VOLUME</p><h2>Sessions over time</h2></div></div><div id="session-trend-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION STATUS</p><h2>Session status distribution</h2></div></div><div id="session-status-chart" class="chart-area"></div></article>
+                </div>
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION CONTEXT</p><h2>Entry point</h2></div></div><div id="session-entry-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION CONTEXT</p><h2>Exit feature</h2></div></div><div id="session-exit-chart" class="chart-area"></div></article>
+                </div>
+                <div class="visual-grid">
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION ENVIRONMENT</p><h2>Platform</h2></div></div><div id="session-platform-chart" class="chart-area"></div></article>
+                  <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION ENVIRONMENT</p><h2>Device</h2></div></div><div id="session-device-chart" class="chart-area"></div></article>
+                </div>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">SESSION SUMMARY</p><h2>Validated session measures</h2></div></div><div class="table-scroll"><table><thead><tr><th>Measure</th><th>Value</th><th>Definition / validation</th></tr></thead><tbody id="session-summary-body"></tbody></table></div></article>
+              </div>
+              <div class="product-module hidden" data-product-module="features">
+                <div class="visual-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">FEATURE EVENTS</p><h2>Events by feature</h2></div></div><div id="feature-ranking-chart" class="chart-area analytics-chart-area"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">EVENT OUTCOMES</p><h2>Success, failure, started and abandoned</h2></div></div><div id="feature-status-chart" class="chart-area"></div></article></div>
+                <div class="visual-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">EVENT PLATFORM</p><h2>Events by platform</h2></div></div><div id="feature-platform-chart" class="chart-area"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">SOURCE SEMANTICS</p><h2>Feature event counts, not summary rows</h2></div></div><p class="table-note">Feature Usage contains 15 summary records. Rankings and outcomes on this page use Feature Events at event grain.</p></article></div>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">CROSS-PLATFORM</p><h2>Feature events by platform</h2></div></div><div class="table-scroll"><table><thead><tr><th>Feature</th><th>Platform</th><th>Event records</th></tr></thead><tbody id="feature-platform-body"></tbody></table></div></article>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">FEATURE RANKING</p><h2>Usage and unique users</h2></div></div><div class="table-scroll"><table><thead><tr><th>Feature</th><th>Event records</th><th>Unique users</th><th>Adoption rate</th></tr></thead><tbody id="feature-table-body"></tbody></table></div></article>
+              </div>
+              <div class="product-module hidden" data-product-module="tasks">
+                <div class="visual-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">TASK FUNNEL</p><h2>Viewed → Started → Completed</h2></div></div><div id="task-funnel-chart" class="chart-area analytics-chart-area"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">TASK OUTCOMES</p><h2>Status distribution</h2></div></div><div id="task-status-chart" class="chart-area"></div></article></div>
+                <div class="visual-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">TASK MIX</p><h2>Task category</h2></div></div><div id="task-category-chart" class="chart-area"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">TASK TREND</p><h2>Task views over time</h2></div></div><div id="task-trend-chart" class="chart-area"></div></article></div>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">TASK QUALITY</p><h2>Funnel counts and lifecycle timings</h2></div></div><div class="table-scroll"><table><thead><tr><th>Stage / measure</th><th>Unique activity records</th><th>Rate / note</th></tr></thead><tbody id="task-summary-body"></tbody></table></div></article>
+              </div>
+              <div class="product-module hidden" data-product-module="retention">
+                <div class="availability-banner"><span class="availability-icon">i</span><div><strong>Retention uses registration cohorts and observed Daily Activity.</strong><p>Day N is exact calendar-day activity after registration. Cohorts without a fully observed day-N window are excluded, not treated as zero.</p></div></div>
+                <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">COHORT HEATMAP</p><h2>Day 1 / 7 / 30 retention</h2></div></div><div id="cohort-heatmap-chart" class="chart-area analytics-chart-area"></div></article>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">REGISTRATION COHORTS</p><h2>Observed retention</h2></div></div><div class="table-scroll"><table><thead><tr><th>Cohort month</th><th>Registered users</th><th>Day 1</th><th>Day 7</th><th>Day 30</th></tr></thead><tbody id="cohort-body"></tbody></table></div></article>
+              </div>
+              <div class="product-module hidden" data-product-module="milestones">
+                <div class="visual-grid"><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">PROGRESSION</p><h2>Milestones by type</h2></div></div><div id="milestone-chart" class="chart-area analytics-chart-area"></div></article><article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">MILESTONE TREND</p><h2>Milestone records over time</h2></div></div><div id="milestone-trend-chart" class="chart-area"></div></article></div>
+                <article class="panel chart-panel"><div class="panel-heading"><div><p class="panel-kicker">XP ACTIVITY</p><h2>XP-flagged feature events</h2></div></div><div id="xp-chart" class="chart-area"></div></article>
+                <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">USER PROGRESSION</p><h2>Milestones per pseudonymous user</h2></div></div><div class="table-scroll"><table><thead><tr><th>User ID</th><th>Milestone records</th></tr></thead><tbody id="milestone-users-body"></tbody></table></div></article>
+              </div>
+            </section>
+
+            <section class="page-panel hidden" id="dictionary-panel">
+              <article class="panel dictionary-controls"><label>Search fields <input type="search" id="dictionary-search" placeholder="Dataset, field, definition..."></label><label>Dataset <select id="dictionary-dataset-filter"><option value="">All datasets</option></select></label><label>Status <select id="dictionary-status-filter"><option value="">All statuses</option><option>Confirmed in supplied dictionary</option><option>Observed field — definition proposed</option></select></label></article>
+              <article class="panel table-panel"><div class="panel-heading"><div><p class="panel-kicker">OBSERVED SOURCE FIELDS</p><h2>Data dictionary</h2></div><span class="result-count" id="dictionary-count"></span></div><div class="table-scroll"><table><thead><tr><th>Dataset / entity</th><th>Field</th><th>Type</th><th>Definition</th><th>Example</th><th>Required</th><th>Allowed values</th><th>Validation</th><th>Sensitivity</th><th>Analytical use</th><th>Status</th></tr></thead><tbody id="dictionary-body"></tbody></table></div></article>
             </section>
           </section>
 
